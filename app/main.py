@@ -1,6 +1,7 @@
 #cd C:\PythonWithMyBro\shift-booking
 #poetry run uvicorn app.main:app --reload
 from fastapi import FastAPI
+from app.database import Base, engine
 from app.routers import rooms, bookings, slots  # Импортируем роутеры
 
 app = FastAPI(
@@ -18,3 +19,6 @@ app.include_router(slots.router)
 def health_check():
     """Проверка работоспособности сервиса"""
     return {"status": "ok"}
+
+from app import models
+Base.metadata.create_all(bind=engine)
