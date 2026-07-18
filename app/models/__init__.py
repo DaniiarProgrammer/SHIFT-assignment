@@ -10,8 +10,8 @@ class Room(Base):
 class Slot(Base):
     __tablename__ = "slots"
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    start_time = Column(String(20))
-    end_time = Column(String(20))
+    start_time = Column(String(10))
+    end_time = Column(String(10))
 
 class User(Base):
     __tablename__ = "users"
@@ -24,5 +24,5 @@ class Booking(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     room_id = Column(Integer, ForeignKey("rooms.id"), nullable=False)
     slot_id = Column(Integer, ForeignKey("slots.id"), nullable=False)
-    date = Column(String(20))
+    date = Column(String(10))
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)

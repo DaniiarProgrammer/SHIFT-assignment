@@ -2,7 +2,7 @@
 #poetry run uvicorn app.main:app --reload
 from fastapi import FastAPI
 from app.database import Base, engine
-from app.routers import rooms, bookings, slots  # Импортируем роутеры
+from app.routers import rooms, bookings, slots, users  # Импортируем роутеры
 
 app = FastAPI(
     title="Сервис бронирования переговорных",
@@ -14,6 +14,7 @@ app = FastAPI(
 app.include_router(rooms.router)
 app.include_router(bookings.router)
 app.include_router(slots.router)
+app.include_router(users.router)
 
 @app.get("/health")
 def health_check():

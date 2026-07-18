@@ -1,51 +1,58 @@
-from fastapi import APIRouter, HTTPException
-from app.database import rooms_db
+from fastapi import APIRouter, HTTPException, Depends
 from app.schemas.rooms import RoomCreate, RoomUpdate
+from sqlalchemy.orm import Session
+from app.database import get_db
+from app.models import Room
+
 
 router = APIRouter(prefix="/rooms", tags=["Rooms"])
 
 @router.get("/")
-def get_rooms():
+def get_rooms(db: Session = Depends(get_db)):
     """Проверка комнат"""
-    return rooms_db
+    rooms = db.query(Room).all()
+    return rooms
 
 @router.get("/{room_id}")
-def get_room(room_id: int):
+def get_room(room_id: int, db: Session = Depends(get_db)):
     """Получить комнату по ID"""
-    for room in rooms_db:
-        if room["id"] == room_id:
-            return room
-                
-    raise HTTPException(status_code=404, detail="Комната не найдена")
+    room = db.query(Room).filter(Room.id == room_id).first()
+    if not room:                
+        raise HTTPException(status_code=404, detail="Комната не найдена")
+    return room
 
 @router.post("/", status_code=201)
-def create_room(room: RoomCreate):
+def create_room(room: RoomCreate, db: Session = Depends(get_db)):
     """Создать комнату"""
-    new_id = max((r["id"] for r in rooms_db), default=0) + 1
-    room_dict = {
-        "id": new_id,
-        "name": room.name,
-        "capacity": room.capacity,
-        }
 
-    rooms_db.append(room_dict)
-    return room_dict
+    db_room = Room(name=room.name, capacity=room.capacity)
+
+    db.add(db_room)
+    db.commit()
+    db.refresh(db_room)
+
+    return db_room
 
 @router.delete("/{room_id}", status_code=204)
-def delete_room(room_id: int):
+def delete_room(room_id: int, db: Session = Depends(get_db)):
     """Удалить комнату"""
-    for i, room in enumerate(rooms_db):
-        if room["id"] == room_id:
-            rooms_db.pop(i) #Удалить элемент по индексу
-            return
-    raise HTTPException(status_code=404, detail="Не найдено")
+    room = db.query(Room).filter(Room.id == room_id).first()
+    if not room:
+        raise HTTPException(status_code=404, detail="Не найдено")
+    
+    db.delete(room)
+    db.commit()
+    return
 
 @router.put("/{room_id}")
-def update_room(room_id: int, room_update: RoomUpdate):
+def update_room(room_id: int, room_update: RoomUpdate, db: Session = Depends(get_db)):
     """Обновить комнату"""
-    for room in rooms_db:
-        if room["id"] == room_id:
-            room["name"] = room_update.name
-            room["capacity"] = room_update.capacity       
-            return room
-    raise HTTPException(status_code=404, detail="Не найдено")
+    room = db.query(Room).filter(Room.id == room_id).first()
+    if not room:
+        raise HTTPException(status_code=404, detail="Не найдено")
+    room.name = room_update.name
+    room.capacity = room_update.capacity
+
+    db.commit()
+    db.refresh(room)
+    return room
