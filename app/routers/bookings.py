@@ -1,9 +1,11 @@
+#routers\bookings.py:
+
 from fastapi import APIRouter, HTTPException, Depends
 from app.schemas.bookings import BookingCreate
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import Booking, User
-
+from app.dependencies import get_current_user
 
 router = APIRouter(prefix="/bookings", tags=["Bookings"])
 
@@ -29,23 +31,20 @@ def get_bookings(db: Session = Depends(get_db)):
     """Проверка броней"""
     bookings = db.query(Booking).all()
     return bookings
-
-def get_role(user_id, db: Session):
-    user = db.query(User).filter(User.id == user_id).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="Не найдено")
-    return user.role
         
 @router.delete("/{booking_id}", status_code=204)
-def delete_booking(booking_id: int, current_user_id: int, db: Session = Depends(get_db)):
+def delete_booking(
+    booking_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)):
     """Удалить бронь"""
     booking = db.query(Booking).filter(Booking.id == booking_id).first()
     if not booking:
         raise HTTPException(status_code=404, detail="Не найдено")
     
     
-    is_author = (booking.user_id == current_user_id)
-    is_admin = (get_role(current_user_id, db) == "admin")
+    is_author = (booking.user_id == current_user.id)
+    is_admin = (current_user.role == "admin")
     if not is_author and not is_admin:
         raise HTTPException(status_code=403, detail="Нет прав для удаления")
     

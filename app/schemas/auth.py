@@ -1,8 +1,10 @@
-from pydantic import BaseModel, Field
+#schemas\auth.py:
+
+from pydantic import BaseModel
 
 class UserAuth(BaseModel):
-    username: str = Field(..., min_length=3, max_length=50)
-    password: str = Field(..., min_length=6, max_length=100)
+    username: str
+    password: str
 
 class Token(BaseModel):
     access_token: str
