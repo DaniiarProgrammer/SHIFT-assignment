@@ -1,3 +1,4 @@
+#app\models\__init__.py:
 from sqlalchemy import Column, Integer, String, ForeignKey
 from app.database import Base
 
@@ -16,8 +17,10 @@ class Slot(Base):
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    username = Column(String(50), unique = True)
-    role = Column(String(20))
+    username = Column(String(50), unique=True, nullable=False)
+    role = Column(String(20), nullable=False, default="employee")
+    hashed_password = Column(String, nullable=False)
+
 
 class Booking(Base):
     __tablename__ = "bookings"
