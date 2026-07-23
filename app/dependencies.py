@@ -1,12 +1,9 @@
-#app\dependencies.py:
-
 from jose import JWTError
 from fastapi import HTTPException, Depends, status
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import User
 from fastapi.security import OAuth2PasswordBearer
-from sqlalchemy.orm import Session
 from app.auth import decode_access_token
 
 # Создаём "парсер" токенов

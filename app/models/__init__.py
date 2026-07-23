@@ -1,12 +1,10 @@
-#app\models\__init__.py:
-
 from sqlalchemy import Column, Integer, String, ForeignKey
 from app.database import Base
 
 class Room(Base):
     __tablename__ = "rooms"
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    name = Column(String(20), nullable=False)
+    name = Column(String(50), nullable=False)
     capacity = Column(Integer, nullable=False)
 
 class Slot(Base):

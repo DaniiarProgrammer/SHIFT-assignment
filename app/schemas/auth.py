@@ -1,5 +1,3 @@
-#schemas\auth.py:
-
 from pydantic import BaseModel
 
 class UserAuth(BaseModel):

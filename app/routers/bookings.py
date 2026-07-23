@@ -1,5 +1,3 @@
-#routers\bookings.py:
-
 from fastapi import APIRouter, HTTPException, Depends
 from app.schemas.bookings import BookingCreate
 from sqlalchemy.orm import Session
@@ -10,8 +8,8 @@ from app.dependencies import get_current_user
 router = APIRouter(prefix="/bookings", tags=["Bookings"])
 
 @router.post("/", status_code=201)
-def create_booking(book: BookingCreate, db: Session = Depends(get_db)):
-    """Создать бронь"""
+def create_booking(book: BookingCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """Создать бронь""" 
     existing_booking = db.query(Booking).filter(
         Booking.room_id == book.room_id,
         Booking.slot_id == book.slot_id,
@@ -19,7 +17,7 @@ def create_booking(book: BookingCreate, db: Session = Depends(get_db)):
     ).first()
     if existing_booking:
         raise HTTPException(status_code=409, detail="Комната уже забронирована")
-    db_booking = Booking(room_id=book.room_id, slot_id=book.slot_id, date=book.date, user_id=book.user_id ) 
+    db_booking = Booking(room_id=book.room_id, slot_id=book.slot_id, date=book.date, user_id=current_user.id ) 
     db.add(db_booking)
     db.commit()
     db.refresh(db_booking)

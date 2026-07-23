@@ -4,9 +4,6 @@ __pycache__/
 *$py.class
 *.so
 
-# Poetry
-poetry.lock
-
 # Virtual environments
 .venv/
 venv/
@@ -25,3 +22,12 @@ Thumbs.db
 # Environment variables
 .env
 .env.local
+
+# Database
+test.db
+
+# Pytest
+.pytest_cache/
+
+# Package metadata
+*.egg-info/

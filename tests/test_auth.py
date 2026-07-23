@@ -1,5 +1,3 @@
-#tests\test_auth.py:
-
 from app.auth import hash_password, verify_password
 
 def test_hash_password_returns_bcrypt_hash():
