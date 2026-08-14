@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from app.database import get_db
 from app.models import User
 from app.schemas.users import UserCreate
@@ -16,9 +17,13 @@ def get_users(db: Session = Depends(get_db)):
 @router.post("/", status_code=201)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
     """Создать пользователя"""
-    hashed_password = hash_password(user.password)
-    db_user = User(username=user.username, role=user.role, hashed_password=hashed_password)
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-    return db_user
+    try:
+        hashed_password = hash_password(user.password)
+        db_user = User(username=user.username, role=user.role, hashed_password=hashed_password)
+        db.add(db_user)
+        db.commit()
+        db.refresh(db_user)
+        return db_user
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="Username уже занят")
