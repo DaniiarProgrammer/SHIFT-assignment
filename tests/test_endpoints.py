@@ -39,3 +39,12 @@ def test_get_room_by_id_success(client):
 def test_get_room_by_id_not_found(client):
     response = client.get(f"/rooms/999")
     assert response.status_code == 404
+
+def test_delete_room_success(client):
+    response_create = client.post("/rooms/", json={"name": "Room 1", "capacity": 10})
+    room_id = response_create.json()["id"]
+    response_delete = client.delete(f"/rooms/{room_id}")
+    assert response_delete.status_code == 204
+    response_get = client.get(f"/rooms/{room_id}")
+    assert response_get.status_code == 404
+    
