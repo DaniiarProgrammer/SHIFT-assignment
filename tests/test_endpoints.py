@@ -68,3 +68,26 @@ def test_create_booking_conflict(client):
     assert booking.status_code == 201
     duplicate_booking = client.post("/bookings/", json={"room_id": 1, "slot_id": 1, "date": "28.07.2026"}, headers=headers)
     assert duplicate_booking.status_code == 409
+
+def test_delete_booking_forbidden(client):
+    client.post("/rooms/", json={"name": "1room", "capacity": 1})
+    client.post("/slots/", json={"start_time": "5:00", "end_time": "16:00"})
+
+    #Первый юзер
+    client.post("/users/", json={"username": "firstuser", "role": "employee", "password": "testpass"})
+    login1 = client.post("/auth/login", data={"username": "firstuser", "password": "testpass"})
+    token1 = login1.json()["access_token"]
+    headers1 = {"Authorization": f"Bearer {token1}"}
+
+    #Второй юзер
+    client.post("/users/", json={"username": "seconduser", "role": "employee", "password": "testpass"})
+    login2 = client.post("/auth/login", data={"username": "seconduser", "password": "testpass"})
+    token2 = login2.json()["access_token"]
+    headers2 = {"Authorization": f"Bearer {token2}"}
+
+    booking = client.post("/bookings/", json={"room_id": 1, "slot_id": 1, "date": "28.07.2026"}, headers=headers1)
+    assert booking.status_code == 201
+    booking_id = booking.json()["id"]
+
+    delete_booking = client.delete(f"/bookings/{booking_id}", headers=headers2)
+    assert delete_booking.status_code == 403
