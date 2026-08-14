@@ -47,4 +47,12 @@ def test_delete_room_success(client):
     assert response_delete.status_code == 204
     response_get = client.get(f"/rooms/{room_id}")
     assert response_get.status_code == 404
-    
+
+def test_update_room_success(client):
+    response_create = client.post("/rooms/", json={"name": "Room 1", "capacity": 10})
+    room_id = response_create.json()["id"]
+    response_update = client.put(f"/rooms/{room_id}", json={"name": "New Room", "capacity": 100})
+    assert response_update.status_code == 200
+    response_get = client.get(f"/rooms/{room_id}")
+    assert response_get.json()["name"] == "New Room"
+    assert response_get.json()["capacity"] == 100
